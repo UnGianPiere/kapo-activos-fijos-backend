@@ -24,6 +24,7 @@ export interface CrearReporteDto {
   notas_generales?: string;
   // Nuevo: para sincronización offline
   esSincronizacionOffline?: boolean;
+  fecha_creacion?: Date | string; // Fecha original del reporte offline
   // Removido: evidence_files global ya no se usa
 }
 
@@ -120,17 +121,24 @@ export class ReporteActivoFijoService extends BaseService<ReporteActivoFijo> {
         });
       }
 
-      // PASO 2: Validar que todos los recursos tienen evidencias
-      this.validarRecursos(recursosConUrls);
+      // PASO 2: Validar que todos los recursos tienen evidencias (solo si NO es sincronización offline)
+      if (!data.esSincronizacionOffline) {
+        this.validarRecursos(recursosConUrls);
+      }
 
       // PASO 3: Crear el reporte en BD
       const id_reporte = await ReporteActivoFijoModel.generarIdReporte();
+
+      // Usar fecha_creacion proporcionada o new Date() por defecto
+      const fechaCreacion = data.fecha_creacion
+        ? new Date(data.fecha_creacion)
+        : new Date();
 
       const reporte = new ReporteActivoFijo(
         null, // _id será asignado por MongoDB
         id_reporte,
         data.titulo,
-        new Date(),
+        fechaCreacion,
         data.usuario_id,
         data.usuario_nombre,
         recursosConUrls.map(r => new RecursoEvaluado(
@@ -152,7 +160,6 @@ export class ReporteActivoFijoService extends BaseService<ReporteActivoFijo> {
       try {
         if (data.esSincronizacionOffline) {
           // Para sincronización offline: validar por cada recurso
-          console.log('🔄 Sincronización offline: Validando actualización de estados por recurso...');
           const validaciones = await this.validarActualizacionEstadosOffline(recursosConUrls, reporte.fecha_creacion);
 
           for (const validacion of validaciones) {
@@ -167,7 +174,6 @@ export class ReporteActivoFijoService extends BaseService<ReporteActivoFijo> {
           }
         } else {
           // Para reportes online normales: actualizar todos los estados
-          console.log('📝 Reporte online: Actualizando estados de todos los recursos...');
           for (const recurso of recursosConUrls) {
             const estadoMonolito = this.mapearEstadoFormAMonolito(recurso.estado);
 
@@ -304,9 +310,9 @@ export class ReporteActivoFijoService extends BaseService<ReporteActivoFijo> {
     }
   }
 
-  async listarReportes(paginacion: Pagination): Promise<{ reportes: ReporteActivoFijo[]; total: number }> {
+  async listarReportes(paginacion: Pagination, sortBy?: string, sortOrder?: 'asc' | 'desc'): Promise<{ reportes: ReporteActivoFijo[]; total: number }> {
     try {
-      return await this.reporteRepository.listar(paginacion);
+      return await this.reporteRepository.listar(paginacion, sortBy, sortOrder);
     } catch (error: any) {
       console.error('Error al listar reportes:', error);
       throw new Error(error.message || 'Error al listar los reportes');

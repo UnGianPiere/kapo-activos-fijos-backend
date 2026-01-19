@@ -20,13 +20,9 @@ export const getStorageClient = (): Storage => {
       const fs = require('fs');
       if (fs.existsSync(config.keyFile)) {
         storageOptions.keyFilename = config.keyFile;
-        logger.info('GCP Storage inicializado con archivo de credenciales', { projectId: config.projectId, bucket: config.bucket });
-      } else {
-        logger.info('GCP Storage inicializado con Application Default Credentials', { projectId: config.projectId, bucket: config.bucket });
       }
     } catch (error) {
       // Si no podemos verificar, usar Application Default Credentials
-      logger.info('GCP Storage inicializado con Application Default Credentials (fallback)', { projectId: config.projectId, bucket: config.bucket });
     }
     
     storageInstance = new Storage(storageOptions);

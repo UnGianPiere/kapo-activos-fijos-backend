@@ -127,12 +127,24 @@ export class ReporteActivoFijoMongoRepository extends BaseMongoRepository<Report
     return doc ? this.toDomain(doc) : null;
   }
 
-  async listar(paginacion: Pagination): Promise<{ reportes: ReporteActivoFijo[]; total: number }> {
+  async listar(paginacion: Pagination, sortBy?: string, sortOrder?: 'asc' | 'desc'): Promise<{ reportes: ReporteActivoFijo[]; total: number }> {
     const { page = 1, limit = 10 } = paginacion;
     const skip = (page - 1) * limit;
 
+    // Construir objeto de ordenamiento
+    let sortObj: any = { created_at: -1 }; // Default: más reciente primero
+    if (sortBy && sortOrder) {
+      if (sortBy === 'fecha_creacion') {
+        sortObj = { fecha_creacion: sortOrder === 'asc' ? 1 : -1 };
+      } else if (sortBy === 'id_reporte') {
+        sortObj = { id_reporte: sortOrder === 'asc' ? 1 : -1 };
+      }
+      // Agregar created_at como secundario para desempates consistentes
+      sortObj.created_at = -1;
+    }
+
     const [docs, total] = await Promise.all([
-      this.model.find().sort({ created_at: -1 }).skip(skip).limit(limit),
+      this.model.find().sort(sortObj).skip(skip).limit(limit),
       this.model.countDocuments()
     ]);
 

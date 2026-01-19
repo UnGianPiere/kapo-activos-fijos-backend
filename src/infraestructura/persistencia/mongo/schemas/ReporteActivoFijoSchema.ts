@@ -80,7 +80,7 @@ const ReporteActivoFijoSchema: Schema<ReporteActivoFijoDocument> = new Schema({
     required: true,
     trim: true,
     uppercase: true,
-    match: /^REP-\d{4}-\d{3}$/
+    match: /^RAF\d{10}$/
   },
   titulo: {
     type: String,
@@ -140,9 +140,9 @@ ReporteActivoFijoSchema.index({ created_at: -1 });
 ReporteActivoFijoSchema.pre('validate', function(next) {
   const reporte = this as ReporteActivoFijoDocument;
 
-  // Validar que todos los recursos tengan al menos una evidencia
+  // Validar que todos los recursos tengan al menos una evidencia (excepto en sincronización offline)
   const recursosSinEvidencia = reporte.recursos.filter(r => !r.evidencia_urls || r.evidencia_urls.length === 0);
-  if (recursosSinEvidencia.length > 0) {
+  if (recursosSinEvidencia.length > 0 && !reporte.fecha_sincronizacion) {
     return next(new Error('Todos los recursos deben tener al menos una URL de evidencia'));
   }
 
@@ -161,22 +161,21 @@ ReporteActivoFijoSchema.pre('validate', function(next) {
 
 // Método estático para generar ID de reporte
 ReporteActivoFijoSchema.statics['generarIdReporte'] = async function(): Promise<string> {
-  const añoActual = new Date().getFullYear();
   const ultimoReporte = await this.findOne(
-    { id_reporte: new RegExp(`^REP-${añoActual}-`) },
+    { id_reporte: /^RAF/ },
     { id_reporte: 1 },
     { sort: { id_reporte: -1 } }
   );
 
   let numeroSecuencial = 1;
   if (ultimoReporte) {
-    const match = ultimoReporte.id_reporte.match(/REP-\d{4}-(\d{3})/);
+    const match = ultimoReporte.id_reporte.match(/RAF(\d{10})/);
     if (match) {
       numeroSecuencial = parseInt(match[1]) + 1;
     }
   }
 
-  return `REP-${añoActual}-${numeroSecuencial.toString().padStart(3, '0')}`;
+  return `RAF${numeroSecuencial.toString().padStart(10, '0')}`;
 };
 
 export const ReporteActivoFijoModel = mongoose.model<ReporteActivoFijoDocument, ReporteActivoFijoModel>('ReporteActivoFijo', ReporteActivoFijoSchema);

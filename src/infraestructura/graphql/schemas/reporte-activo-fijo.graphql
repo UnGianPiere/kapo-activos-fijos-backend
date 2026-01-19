@@ -96,6 +96,7 @@ extend type Mutation {
     notas_generales: String
     # Nuevo: para sincronización offline
     esSincronizacionOffline: Boolean
+    fecha_creacion: DateTime
     # evidence_files removido - ahora se envían por recurso
   ): ReporteActivoFijo!
 

@@ -106,10 +106,13 @@ export class ReporteActivoFijoResolver {
             async () => {
               // Convertir input de GraphQL al formato del servicio
               const serviceInput = this.convertGraphQLInputToServiceInput(input);
-              const { page = 1, limit = 10 } = serviceInput;
+              const { page = 1, limit = 10, sortBy, sortOrder } = serviceInput;
 
-              // Para simplificar, por ahora usamos paginación básica
-              const { reportes, total } = await this.reporteService.listarReportes(new Pagination(page, limit));
+              // Crear paginación
+              const paginacion = new Pagination(page, limit);
+
+              // Obtener reportes con ordenamiento directo desde la base de datos
+              const { reportes, total } = await this.reporteService.listarReportes(paginacion, sortBy, sortOrder);
 
               // Obtener todos los _id en batch
               const idsMap = await this.getMongoIdsBatch(reportes.map(r => r.id_reporte));
@@ -135,7 +138,7 @@ export class ReporteActivoFijoResolver {
         },
       },
       Mutation: {
-        addReporteActivoFijo: async (_: any, { titulo, usuario_id, usuario_nombre, recursos, notas_generales, esSincronizacionOffline }: any) => {
+        addReporteActivoFijo: async (_: any, { titulo, usuario_id, usuario_nombre, recursos, notas_generales, esSincronizacionOffline, fecha_creacion }: any) => {
 
           return await ErrorHandler.handleError(
             async () => {
@@ -145,7 +148,8 @@ export class ReporteActivoFijoResolver {
                 usuario_nombre,
                 recursos,
                 notas_generales,
-                esSincronizacionOffline
+                esSincronizacionOffline,
+                fecha_creacion
               });
               return {
                 ...reporte,
