@@ -1,0 +1,122 @@
+type RecursoEvaluado {
+  id_recurso: ID!
+  codigo_recurso: String!
+  nombre_recurso: String!
+  marca: String
+  estado: String!
+  descripcion: String!
+  evidencia_urls: [String!]!
+}
+
+type ReporteActivoFijo {
+  _id: ID!
+  id_reporte: String!
+  titulo: String
+  fecha_creacion: DateTime!
+  usuario_id: ID!
+  usuario_nombre: String!
+  recursos: [RecursoEvaluado!]!
+  notas_generales: String
+  # Campo para sincronización offline
+  fecha_sincronizacion: DateTime
+  created_at: DateTime!
+  updated_at: DateTime!
+}
+
+type EstadisticasReportes {
+  totalReportes: Int!
+  reportesPorMes: [ReportePorMes!]!
+  estadosMasReportados: [EstadoReportado!]!
+  recursosMasEvaluados: [RecursoMasEvaluado!]!
+}
+
+type ReportePorMes {
+  mes: String!
+  cantidad: Int!
+}
+
+type EstadoReportado {
+  estado: String!
+  cantidad: Int!
+}
+
+type RecursoMasEvaluado {
+  id: ID!
+  codigo: String!
+  nombre: String!
+  evaluaciones: Int!
+}
+
+type HistorialRecurso {
+  recurso: InfoRecurso!
+  historial: [EvaluacionRecurso!]!
+}
+
+type InfoRecurso {
+  id: ID!
+  codigo: String!
+  nombre: String!
+}
+
+type EvaluacionRecurso {
+  id_reporte: String!
+  fecha: DateTime!
+  estado: String!
+  descripcion: String!
+  evidencia_urls: [String!]!
+}
+
+# Scalar para subida de archivos
+scalar Upload
+
+# Tipo de respuesta paginada específica para ReporteActivoFijo
+type PaginatedReporteActivoFijoResponse {
+  data: [ReporteActivoFijo!]!
+  pagination: PaginationInfo!
+}
+
+extend type Query {
+  listReportesActivosFijos: [ReporteActivoFijo!]!
+  getReporteActivoFijo(id: String!): ReporteActivoFijo
+  getReporteActivoFijoPorId(id_reporte: String!): ReporteActivoFijo
+  getReportesActivosFijosByUsuario(id_usuario: String!): [ReporteActivoFijo!]!
+  getReportesActivosFijosByRecurso(id_recurso: String!): [ReporteActivoFijo!]!
+  getHistorialRecurso(id_recurso: String!): HistorialRecurso!
+  estadisticasReportes: EstadisticasReportes!
+  # Query paginado con filtros y búsqueda
+  listReportesActivosFijosPaginated(input: PaginationFilterInput): PaginatedReporteActivoFijoResponse!
+}
+
+extend type Mutation {
+  addReporteActivoFijo(
+    titulo: String
+    usuario_id: String!
+    usuario_nombre: String!
+    recursos: [RecursoEvaluadoInput!]!
+    notas_generales: String
+    # Nuevo: para sincronización offline
+    esSincronizacionOffline: Boolean
+    # evidence_files removido - ahora se envían por recurso
+  ): ReporteActivoFijo!
+
+  updateReporteActivoFijo(
+    id: String!
+    titulo: String
+    recursos: [RecursoEvaluadoInput!]
+    notas_generales: String
+    # evidence_files removido - ahora se envían por recurso
+  ): ReporteActivoFijo
+
+  deleteReporteActivoFijo(id: String!): ReporteActivoFijo
+}
+
+input RecursoEvaluadoInput {
+  id_recurso: ID!
+  codigo_recurso: String!
+  nombre_recurso: String!
+  marca: String
+  estado: String!
+  descripcion: String!
+  evidencia_urls: [String!]!
+  evidence_files: [Upload]  # Archivos específicos de este recurso
+}

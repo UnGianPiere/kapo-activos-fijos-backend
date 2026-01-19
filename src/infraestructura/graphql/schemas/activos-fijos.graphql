@@ -1,0 +1,71 @@
+# ============================================================================
+# ESQUEMA DE ACTIVOS FIJOS - Gestión de Activos Fijos
+# ============================================================================
+
+# ============================================================================
+# TIPOS DE ACTIVOS FIJOS
+# ============================================================================
+
+type ActivoFijo {
+  id_recurso: String!
+  codigo_recurso: String!
+  nombre_recurso: String!
+  cantidad_recurso: Float!
+  costo_recurso: Float!
+  id_bodega: String!
+  codigo_bodega: String!
+  nombre_bodega: String!
+  id_obra: String!
+  nombre_obra: String!
+  id_proyecto: String!
+  nombre_proyecto: String!
+  id_empresa: String!
+  nombre_empresa: String!
+  unidad_recurso_id: String
+  unidad_recurso_nombre: String
+  descripcion_recurso: String
+  fecha_recurso: String
+  vigente_recurso: Boolean!
+  usado_recurso: Boolean!
+  tipo_recurso_id: String
+  clasificacion_recurso_id: String
+  estado_recurso_almacen: String
+}
+
+type ActivosFijosPaginationInfo {
+  page: Int!
+  itemsPage: Int!
+  total: Int!
+  pages: Int!
+}
+
+type ActivosFijosPaginationResult {
+  info: ActivosFijosPaginationInfo!
+  status: Boolean!
+  message: String!
+  almacenActivosFijos: [ActivoFijo!]!
+}
+
+# ============================================================================
+# INPUTS PARA ACTIVOS FIJOS
+# ============================================================================
+
+input ActivosFijosPaginationInput {
+  page: Int = 1
+  itemsPage: Int = 20
+  searchTerm: String
+  filterRangeDate: FilterRangeDateInput
+}
+
+input FilterRangeDateInput {
+  fecha_desde: String
+  fecha_hasta: String
+}
+
+# ============================================================================
+# QUERIES PARA ACTIVOS FIJOS
+# ============================================================================
+
+type Query {
+  listActivosFijosPaginados(input: ActivosFijosPaginationInput): ActivosFijosPaginationResult!
+}

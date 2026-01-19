@@ -1,0 +1,110 @@
+# ============================================================================
+# ESQUEMA DE RECURSOS - Gestión de Recursos Activos Fijos
+# ============================================================================
+
+# ============================================================================
+# TIPOS DE RECURSOS
+# ============================================================================
+
+type ImagenRecurso {
+  id: ID!
+  file: String!
+  fecha: String!
+}
+
+type Unidad {
+  id: ID
+  nombre: String
+  unidad_id: String
+}
+
+type TipoRecurso {
+  id: ID
+  nombre: String
+}
+
+type TipoCostoRecurso {
+  id: ID
+  nombre: String
+  codigo: String
+}
+
+type ClasificacionRecurso {
+  id: ID
+  nombre: String
+}
+
+type Recurso {
+  id: ID!
+  recurso_id: String!
+  codigo: String
+  nombre: String!
+  descripcion: String!
+  fecha: String
+  cantidad: Float!
+  unidad_id: String
+  unidad: Unidad
+  precio_actual: Float
+  vigente: Boolean
+  tipo_recurso_id: String
+  tipo_recurso: TipoRecurso
+  tipo_recurso_nombre: String
+  tipo_costo_recurso_id: String
+  tipo_costo_recurso: TipoCostoRecurso
+  clasificacion_recurso_id: String
+  clasificacion_recurso: ClasificacionRecurso
+  activo_fijo: Boolean!
+  usado: Boolean!
+  imagenes: [ImagenRecurso]
+  combustible_ids: [String]
+  estado_activo_fijo: String
+  fecha_checked_activo_fijo: String
+}
+
+type RecursosPaginationInfo {
+  page: Int!
+  pages: Int!
+  itemsPage: Int!
+  total: Int!
+}
+
+type RecursosPaginationResult {
+  info: RecursosPaginationInfo!
+  status: Boolean!
+  message: String!
+  recursos: [Recurso!]!
+}
+
+# ============================================================================
+# INPUTS PARA RECURSOS
+# ============================================================================
+
+input RecursosActivosFijosFilters {
+  page: Int = 1
+  itemsPage: Int = 20
+  searchTerm: String
+  estado_activo_fijo: String
+  activo_fijo: Boolean
+}
+
+# ============================================================================
+# QUERIES PARA RECURSOS
+# ============================================================================
+
+type Query {
+  listRecursosActivosFijos(input: RecursosActivosFijosFilters): RecursosPaginationResult!
+  getRecursoActivoFijo(id: ID!): Recurso
+  listAllRecursos(activoFijo: Boolean, searchTerm: String): [Recurso!]!
+}
+
+# ============================================================================
+# MUTATIONS PARA RECURSOS
+# ============================================================================
+
+type Mutation {
+  # Actualizar estado de un recurso en almacén (consume del backend principal)
+  updateEstadoRecursoAlmacen(
+    idRecurso: String!
+    estadoRecursoAlmacen: String!
+  ): Recurso!
+}
