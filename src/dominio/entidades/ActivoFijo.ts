@@ -40,6 +40,15 @@ export interface ActivosFijosFilter {
 }
 
 /**
+ * Input de filtros para activos fijos almacenados
+ */
+export interface ActivosFijosFilterInput {
+  id_obra?: string;
+  id_bodega?: string;
+  estado_recurso_almacen?: string;
+}
+
+/**
  * Input de paginación para activos fijos
  */
 export interface ActivosFijosPaginationInput {
@@ -50,6 +59,7 @@ export interface ActivosFijosPaginationInput {
     fecha_desde?: string;
     fecha_hasta?: string;
   };
+  filter?: ActivosFijosFilterInput;
 }
 
 /**

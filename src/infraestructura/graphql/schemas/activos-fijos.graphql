@@ -6,6 +6,21 @@
 # TIPOS DE ACTIVOS FIJOS
 # ============================================================================
 
+type Obra {
+  _id: ID!
+  nombre: String!
+  titulo: String
+  id_proyecto: String
+  empresa_id: String
+}
+
+type Bodega {
+  _id: ID!
+  codigo: String!
+  nombre: String!
+  obra_id: String!
+}
+
 type ActivoFijo {
   id_recurso: String!
   codigo_recurso: String!
@@ -26,7 +41,6 @@ type ActivoFijo {
   descripcion_recurso: String
   fecha_recurso: String
   vigente_recurso: Boolean!
-  usado_recurso: Boolean!
   tipo_recurso_id: String
   clasificacion_recurso_id: String
   estado_recurso_almacen: String
@@ -55,6 +69,13 @@ input ActivosFijosPaginationInput {
   itemsPage: Int = 20
   searchTerm: String
   filterRangeDate: FilterRangeDateInput
+  filter: ActivosFijosFilterInput
+}
+
+input ActivosFijosFilterInput {
+  id_obra: String
+  id_bodega: String
+  estado_recurso_almacen: String
 }
 
 input FilterRangeDateInput {
@@ -68,4 +89,6 @@ input FilterRangeDateInput {
 
 type Query {
   listActivosFijosPaginados(input: ActivosFijosPaginationInput): ActivosFijosPaginationResult!
+  listObras: [Obra!]!
+  listBodegas: [Bodega!]!
 }

@@ -10,6 +10,8 @@ import { UsuarioResolver } from './UsuarioResolver';
 import { ActivoFijoResolver } from './ActivoFijoResolver';
 import { ReporteActivoFijoResolver } from './ReporteActivoFijoResolver';
 import { RecursoResolver } from './RecursoResolver';
+import { ObraResolver } from './ObraResolver';
+import { BodegaResolver } from './BodegaResolver';
 
 // Importar servicios
 import { AuthService } from '../../../aplicacion/servicios/AuthService';
@@ -17,6 +19,8 @@ import { UsuarioService } from '../../../aplicacion/servicios/UsuarioService';
 import { ActivoFijoService } from '../../../aplicacion/servicios/ActivoFijoService';
 import { ReporteActivoFijoService } from '../../../aplicacion/servicios/ReporteActivoFijoService';
 import { RecursoService } from '../../../aplicacion/servicios/RecursoService';
+import { ObraService } from '../../../aplicacion/servicios/ObraService';
+import { BodegaService } from '../../../aplicacion/servicios/BodegaService';
 
 // Importar repositorios HTTP
 import { HttpAuthRepository } from '../../persistencia/http/HttpAuthRepository';
@@ -27,6 +31,8 @@ import { ReporteActivoFijoMongoRepository } from '../../persistencia/mongo/Repor
 
 // Importar repositorios HTTP para activos fijos
 import { HttpActivoFijoRepository } from '../../persistencia/http/HttpActivoFijoRepository';
+import { HttpObraRepository } from '../../persistencia/http/HttpObraRepository';
+import { HttpBodegaRepository } from '../../persistencia/http/HttpBodegaRepository';
 import { HttpRecursoRepository } from '../../persistencia/http/HttpRecursoRepository';
 
 // Importar Container para DI
@@ -71,6 +77,12 @@ export class ResolverFactory {
     // Registrar HttpActivoFijoRepository
     container.register('HttpActivoFijoRepository', () => new HttpActivoFijoRepository(), true);
 
+    // Registrar HttpObraRepository
+    container.register('HttpObraRepository', () => new HttpObraRepository(), true);
+
+    // Registrar HttpBodegaRepository
+    container.register('HttpBodegaRepository', () => new HttpBodegaRepository(), true);
+
     // Registrar HttpRecursoRepository
     container.register('HttpRecursoRepository', () => new HttpRecursoRepository(), true);
 
@@ -93,6 +105,18 @@ export class ResolverFactory {
     container.register('ActivoFijoService', (c) => {
       const activoFijoRepo = c.resolve<HttpActivoFijoRepository>('HttpActivoFijoRepository');
       return new ActivoFijoService(activoFijoRepo);
+    }, true);
+
+    // Registrar ObraService
+    container.register('ObraService', (c) => {
+      const obraRepo = c.resolve<HttpObraRepository>('HttpObraRepository');
+      return new ObraService(obraRepo);
+    }, true);
+
+    // Registrar BodegaService
+    container.register('BodegaService', (c) => {
+      const bodegaRepo = c.resolve<HttpBodegaRepository>('HttpBodegaRepository');
+      return new BodegaService(bodegaRepo);
     }, true);
 
     // Registrar ReporteActivoFijoService
@@ -124,6 +148,18 @@ export class ResolverFactory {
     container.register('ActivoFijoResolver', (c) => {
       const activoFijoService = c.resolve<ActivoFijoService>('ActivoFijoService');
       return new ActivoFijoResolver(activoFijoService);
+    }, true);
+
+    // Registrar ObraResolver
+    container.register('ObraResolver', (c) => {
+      const obraService = c.resolve<ObraService>('ObraService');
+      return new ObraResolver(obraService);
+    }, true);
+
+    // Registrar BodegaResolver
+    container.register('BodegaResolver', (c) => {
+      const bodegaService = c.resolve<BodegaService>('BodegaService');
+      return new BodegaResolver(bodegaService);
     }, true);
 
     // Registrar ReporteActivoFijoResolver
@@ -164,6 +200,16 @@ export class ResolverFactory {
       const activoFijoResolver = container.resolve<ActivoFijoResolver>('ActivoFijoResolver');
       resolvers.push(activoFijoResolver.getResolvers());
       logger.debug('Resolver configurado: activo fijo');
+
+      // Crear ObraResolver
+      const obraResolver = container.resolve<ObraResolver>('ObraResolver');
+      resolvers.push(obraResolver.getResolvers());
+      logger.debug('Resolver configurado: obra');
+
+      // Crear BodegaResolver
+      const bodegaResolver = container.resolve<BodegaResolver>('BodegaResolver');
+      resolvers.push(bodegaResolver.getResolvers());
+      logger.debug('Resolver configurado: bodega');
 
       // Crear ReporteActivoFijoResolver
       const reporteResolver = container.resolve<ReporteActivoFijoResolver>('ReporteActivoFijoResolver');

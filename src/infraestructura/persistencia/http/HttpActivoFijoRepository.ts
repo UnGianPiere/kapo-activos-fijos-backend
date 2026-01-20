@@ -21,12 +21,14 @@ export class HttpActivoFijoRepository extends BaseHttpRepository<ActivoFijo> {
         $itemsPage: Int
         $searchTerm: String
         $filterRangeDate: FilterRangeDateInput
+        $filter: AlmacenActivoFijoFilterInput
       ) {
         ListAlmacenActivosFijoPaginado(
           page: $page
           itemsPage: $itemsPage
           searchTerm: $searchTerm
           filterRangeDate: $filterRangeDate
+          filter: $filter
         ) {
           info {
             page
@@ -56,7 +58,6 @@ export class HttpActivoFijoRepository extends BaseHttpRepository<ActivoFijo> {
             descripcion_recurso
             fecha_recurso
             vigente_recurso
-            usado_recurso
             tipo_recurso_id
             clasificacion_recurso_id
             estado_recurso_almacen
@@ -69,7 +70,8 @@ export class HttpActivoFijoRepository extends BaseHttpRepository<ActivoFijo> {
       page: input.page || 1,
       itemsPage: input.itemsPage || 20,
       searchTerm: input.searchTerm,
-      filterRangeDate: input.filterRangeDate
+      filterRangeDate: input.filterRangeDate,
+      filter: input.filter
     };
 
     const response = await this.graphqlRequest(
