@@ -14,7 +14,7 @@ export const getStorageClient = (): Storage => {
     };
     
     // Prioridad 1: variable de entorno con credenciales (producción)
-    const credentialsJson = process.env.GOOGLE_CLOUD_CREDENTIALS_JSON;
+    const credentialsJson = process.env['GOOGLE_CLOUD_CREDENTIALS_JSON'];
     if (credentialsJson) {
       try {
         storageOptions.credentials = JSON.parse(credentialsJson);
