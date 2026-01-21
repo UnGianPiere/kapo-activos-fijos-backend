@@ -36,6 +36,9 @@ RUN npm ci --only=production || npm install --only=production
 # Copiar código compilado desde builder
 COPY --from=builder /app/dist ./dist
 
+# Copiar archivo de credenciales GCP (necesario para producción)
+COPY --from=builder /app/src/infraestructura/config/gcp-key.json ./src/infraestructura/config/gcp-key.json
+
 # Usar usuario no-root para mayor seguridad
 RUN addgroup -g 1001 -S nodejs && \
     adduser -S nodejs -u 1001 && \

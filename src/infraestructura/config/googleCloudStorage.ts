@@ -9,20 +9,40 @@ let storageInstance: Storage | null = null;
 
 export const getStorageClient = (): Storage => {
   if (!storageInstance) {
-    // En Cloud Run, usar Application Default Credentials (disponibles automáticamente)
-    // Solo usar keyFilename si existe el archivo (desarrollo local)
     const storageOptions: { projectId: string; keyFilename?: string } = {
       projectId: config.projectId,
     };
     
-    // Solo agregar keyFilename si el archivo existe (desarrollo local)
-    try {
-      const fs = require('fs');
-      if (fs.existsSync(config.keyFile)) {
-        storageOptions.keyFilename = config.keyFile;
+    // Buscar el archivo de credenciales en diferentes ubicaciones posibles
+    const fs = require('fs');
+    const path = require('path');
+    
+    // Rutas posibles donde puede estar el archivo
+    const possiblePaths = [
+      config.keyFile, // Ruta configurada (desarrollo: ./src/...)
+      path.join(process.cwd(), 'src/infraestructura/config/gcp-key.json'), // Desarrollo
+      path.join(process.cwd(), 'dist/infraestructura/config/gcp-key.json'), // Producción compilado
+      path.join(__dirname, '../config/gcp-key.json'), // Relativo al archivo compilado
+      path.join(__dirname, '../../config/gcp-key.json'), // Alternativa relativa
+      '/app/src/infraestructura/config/gcp-key.json', // Docker/Cloud Run
+    ];
+    
+    let keyFileFound = false;
+    for (const filePath of possiblePaths) {
+      try {
+        if (fs.existsSync(filePath)) {
+          storageOptions.keyFilename = filePath;
+          logger.info(`✅ Archivo de credenciales GCP encontrado en: ${filePath}`);
+          keyFileFound = true;
+          break;
+        }
+      } catch (error) {
+        // Continuar buscando en otras rutas
       }
-    } catch (error) {
-      // Si no podemos verificar, usar Application Default Credentials
+    }
+    
+    if (!keyFileFound) {
+      logger.warn('⚠️ No se encontró archivo de credenciales GCP, intentando Application Default Credentials');
     }
     
     storageInstance = new Storage(storageOptions);
