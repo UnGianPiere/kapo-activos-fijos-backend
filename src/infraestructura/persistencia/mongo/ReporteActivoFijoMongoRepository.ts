@@ -51,7 +51,7 @@ export class ReporteActivoFijoMongoRepository extends BaseMongoRepository<Report
     const doc = await this.model.findOne(
       { 'recursos.id_recurso': id_recurso },
       {},
-      { sort: { created_at: -1 } }
+      { sort: { fecha_creacion: -1 } }
     );
 
     return doc ? this.toDomain(doc) : null;

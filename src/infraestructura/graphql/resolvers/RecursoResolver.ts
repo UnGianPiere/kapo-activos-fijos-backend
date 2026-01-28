@@ -69,6 +69,30 @@ export class RecursoResolver {
       },
 
       Mutation: {
+        createRecursosFromOffline: async (
+          _: unknown,
+          args: { recursos: Array<{
+            tempId: string;
+            nombre: string;
+            descripcion: string;
+            precio_actual: number;
+            unidad_id: string;
+            clasificacion_recurso_id: string;
+            tipo_recurso_id: string;
+            tipo_costo_recurso_id: string;
+            vigente: boolean;
+            activo_fijo: boolean;
+            usado: boolean;
+          }> }
+        ) => {
+          try {
+            return await this.recursoService.createRecursosFromOffline(args.recursos);
+          } catch (error) {
+            console.error('Error en createRecursosFromOffline resolver:', error);
+            throw new Error("No se pudieron crear los recursos offline");
+          }
+        },
+
         updateEstadoRecursoAlmacen: async (
           _: unknown,
           args: { idRecurso: string; estadoRecursoAlmacen: string }

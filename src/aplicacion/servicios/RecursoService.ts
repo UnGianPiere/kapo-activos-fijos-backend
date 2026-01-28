@@ -108,6 +108,104 @@ export class RecursoService {
   }
 
   /**
+   * Crea recursos desde offline en el monolito y devuelve mapeo temp→real
+   */
+  async createRecursosFromOffline(
+    recursos: Array<{
+      tempId: string;
+      nombre: string;
+      descripcion: string;
+      precio_actual: number;
+      unidad_id: string;
+      clasificacion_recurso_id: string;
+      tipo_recurso_id: string;
+      tipo_costo_recurso_id: string;
+      vigente: boolean;
+      activo_fijo: boolean;
+      usado: boolean;
+    }>
+  ): Promise<Array<{ tempId: string; realId: string; codigoReal: string }>> {
+    try {
+      this.logger.info('RecursoService: Creando recursos desde offline', {
+        count: recursos.length
+      });
+
+      const results: Array<{ tempId: string; realId: string; codigoReal: string }> = [];
+
+      for (const recurso of recursos) {
+        const mutation = `
+          mutation AddRecurso(
+            $nombre: String!
+            $descripcion: String!
+            $cantidad: Float!
+            $unidad_id: String!
+            $precio_actual: Float!
+            $vigente: Boolean!
+            $tipo_recurso_id: String!
+            $tipo_costo_recurso_id: String!
+            $clasificacion_recurso_id: String!
+            $activo_fijo: Boolean!
+            $usado: Boolean!
+          ) {
+            addRecurso(
+              nombre: $nombre
+              descripcion: $descripcion
+              cantidad: $cantidad
+              unidad_id: $unidad_id
+              precio_actual: $precio_actual
+              vigente: $vigente
+              tipo_recurso_id: $tipo_recurso_id
+              tipo_costo_recurso_id: $tipo_costo_recurso_id
+              clasificacion_recurso_id: $clasificacion_recurso_id
+              activo_fijo: $activo_fijo
+              usado: $usado
+            ) {
+              id
+              recurso_id
+              codigo
+              nombre
+            }
+          }
+        `;
+
+        const response = await this.recursoRepository.executeGraphQLMutation<{
+          addRecurso: { id: string; recurso_id: string; codigo: string; nombre: string }
+        }>(mutation, {
+          nombre: recurso.nombre,
+          descripcion: recurso.descripcion,
+          cantidad: 1, // Default para recursos offline
+          unidad_id: recurso.unidad_id,
+          precio_actual: recurso.precio_actual,
+          vigente: recurso.vigente,
+          tipo_recurso_id: recurso.tipo_recurso_id,
+          tipo_costo_recurso_id: recurso.tipo_costo_recurso_id,
+          clasificacion_recurso_id: recurso.clasificacion_recurso_id,
+          activo_fijo: recurso.activo_fijo,
+          usado: recurso.usado
+        });
+
+        results.push({
+          tempId: recurso.tempId,
+          realId: response.addRecurso.id,
+          codigoReal: response.addRecurso.codigo
+        });
+      }
+
+      this.logger.info('RecursoService: Recursos offline creados exitosamente', {
+        created: results.length
+      });
+
+      return results;
+
+    } catch (error) {
+      this.logger.error('RecursoService: Error creando recursos desde offline', {
+        error: error instanceof Error ? error.message : String(error)
+      });
+      throw error;
+    }
+  }
+
+  /**
    * Actualiza el estado de un recurso en almacén
    */
   async updateEstadoRecursoAlmacen(

@@ -1,0 +1,14 @@
+# ============================================================================
+# SCHEMA UNIDAD - Consumido desde el monolito
+# ============================================================================
+
+type Unidad {
+  id: ID!
+  unidad_id: String!
+  nombre: String!
+  descripcion: String!
+}
+
+extend type Query {
+  listUnidad: [Unidad!]!
+}

@@ -87,6 +87,26 @@ input RecursosActivosFijosFilters {
   activo_fijo: Boolean
 }
 
+input RecursoOfflineInput {
+  tempId: String!
+  nombre: String!
+  descripcion: String!
+  precio_actual: Float!
+  unidad_id: String!
+  clasificacion_recurso_id: String!
+  tipo_recurso_id: String!
+  tipo_costo_recurso_id: String!
+  vigente: Boolean!
+  activo_fijo: Boolean!
+  usado: Boolean!
+}
+
+type RecursoOfflineResult {
+  tempId: String!
+  realId: String!
+  codigoReal: String!
+}
+
 # ============================================================================
 # QUERIES PARA RECURSOS
 # ============================================================================
@@ -102,6 +122,11 @@ type Query {
 # ============================================================================
 
 type Mutation {
+  # Crear recursos desde offline (sincronización)
+  createRecursosFromOffline(
+    recursos: [RecursoOfflineInput!]!
+  ): [RecursoOfflineResult!]!
+  
   # Actualizar estado de un recurso en almacén (consume del backend principal)
   updateEstadoRecursoAlmacen(
     idRecurso: String!

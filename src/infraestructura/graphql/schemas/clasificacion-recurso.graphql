@@ -1,0 +1,15 @@
+# ============================================================================
+# SCHEMA CLASIFICACION RECURSO - Consumido desde el monolito
+# ============================================================================
+
+type ClasificacionRecurso {
+  id: ID!
+  nombre: String!
+  parent_id: ID
+  childs: [ClasificacionRecurso!]
+}
+
+extend type Query {
+  listClasificacionRecurso: [ClasificacionRecurso!]!
+  listClasificacionRecursoByParentId(parentId: ID!): [ClasificacionRecurso!]!
+}

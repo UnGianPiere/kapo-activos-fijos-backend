@@ -12,6 +12,8 @@ import { ReporteActivoFijoResolver } from './ReporteActivoFijoResolver';
 import { RecursoResolver } from './RecursoResolver';
 import { ObraResolver } from './ObraResolver';
 import { BodegaResolver } from './BodegaResolver';
+import { UnidadResolver } from './UnidadResolver';
+import { ClasificacionRecursoResolver } from './ClasificacionRecursoResolver';
 
 // Importar servicios
 import { AuthService } from '../../../aplicacion/servicios/AuthService';
@@ -21,6 +23,8 @@ import { ReporteActivoFijoService } from '../../../aplicacion/servicios/ReporteA
 import { RecursoService } from '../../../aplicacion/servicios/RecursoService';
 import { ObraService } from '../../../aplicacion/servicios/ObraService';
 import { BodegaService } from '../../../aplicacion/servicios/BodegaService';
+import { UnidadService } from '../../../aplicacion/servicios/UnidadService';
+import { ClasificacionRecursoService } from '../../../aplicacion/servicios/ClasificacionRecursoService';
 
 // Importar repositorios HTTP
 import { HttpAuthRepository } from '../../persistencia/http/HttpAuthRepository';
@@ -34,6 +38,8 @@ import { HttpActivoFijoRepository } from '../../persistencia/http/HttpActivoFijo
 import { HttpObraRepository } from '../../persistencia/http/HttpObraRepository';
 import { HttpBodegaRepository } from '../../persistencia/http/HttpBodegaRepository';
 import { HttpRecursoRepository } from '../../persistencia/http/HttpRecursoRepository';
+import { HttpUnidadRepository } from '../../persistencia/http/HttpUnidadRepository';
+import { HttpClasificacionRecursoRepository } from '../../persistencia/http/HttpClasificacionRecursoRepository';
 
 // Importar Container para DI
 import { Container } from '../../di/Container';
@@ -86,6 +92,12 @@ export class ResolverFactory {
     // Registrar HttpRecursoRepository
     container.register('HttpRecursoRepository', () => new HttpRecursoRepository(), true);
 
+    // Registrar HttpUnidadRepository
+    container.register('HttpUnidadRepository', () => new HttpUnidadRepository(), true);
+
+    // Registrar HttpClasificacionRecursoRepository
+    container.register('HttpClasificacionRecursoRepository', () => new HttpClasificacionRecursoRepository(), true);
+
     // Registrar ReporteActivoFijoMongoRepository
     container.register('ReporteActivoFijoMongoRepository', () => new ReporteActivoFijoMongoRepository(), true);
 
@@ -132,6 +144,18 @@ export class ResolverFactory {
       return new RecursoService(recursoRepo);
     }, true);
 
+    // Registrar UnidadService
+    container.register('UnidadService', (c) => {
+      const unidadRepo = c.resolve<HttpUnidadRepository>('HttpUnidadRepository');
+      return new UnidadService(unidadRepo);
+    }, true);
+
+    // Registrar ClasificacionRecursoService
+    container.register('ClasificacionRecursoService', (c) => {
+      const clasificacionRepo = c.resolve<HttpClasificacionRecursoRepository>('HttpClasificacionRecursoRepository');
+      return new ClasificacionRecursoService(clasificacionRepo);
+    }, true);
+
     // Registrar AuthResolver
     container.register('AuthResolver', (c) => {
       const authService = c.resolve<AuthService>('AuthService');
@@ -174,7 +198,19 @@ export class ResolverFactory {
       return new RecursoResolver(recursoService);
     }, true);
 
-    logger.info('Container inicializado con dependencias de autenticación, usuarios y reportes');
+    // Registrar UnidadResolver
+    container.register('UnidadResolver', (c) => {
+      const unidadService = c.resolve<UnidadService>('UnidadService');
+      return new UnidadResolver(unidadService);
+    }, true);
+
+    // Registrar ClasificacionRecursoResolver
+    container.register('ClasificacionRecursoResolver', (c) => {
+      const clasificacionService = c.resolve<ClasificacionRecursoService>('ClasificacionRecursoService');
+      return new ClasificacionRecursoResolver(clasificacionService);
+    }, true);
+
+    logger.info('Container inicializado con dependencias de autenticación, usuarios, reportes, unidades y clasificaciones');
   }
 
   /**
@@ -220,6 +256,16 @@ export class ResolverFactory {
       const recursoResolver = container.resolve<RecursoResolver>('RecursoResolver');
       resolvers.push(recursoResolver.getResolvers());
       logger.debug('Resolver configurado: recurso');
+
+      // Crear UnidadResolver
+      const unidadResolver = container.resolve<UnidadResolver>('UnidadResolver');
+      resolvers.push(unidadResolver.getResolvers());
+      logger.debug('Resolver configurado: unidad');
+
+      // Crear ClasificacionRecursoResolver
+      const clasificacionResolver = container.resolve<ClasificacionRecursoResolver>('ClasificacionRecursoResolver');
+      resolvers.push(clasificacionResolver.getResolvers());
+      logger.debug('Resolver configurado: clasificacion recurso');
     } catch (error) {
       logger.error('Error configurando resolvers', {
         error: error instanceof Error ? error.message : String(error)
